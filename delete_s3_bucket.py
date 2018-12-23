@@ -2,6 +2,7 @@
 
 import boto3
 import json
+from botocore.errorfactory import BaseClientExceptions
 
 with open('config.json') as f:
     config = json.load(f)
@@ -15,4 +16,8 @@ s3 = boto3.resource(
 
 bucket_config = config['s3']['buckets'][0]
 bucket = s3.Bucket(bucket_config['name'])
-bucket.delete()
+try:
+    bucket.delete()
+except Exception as e:
+    if e.response['Error']['Code']:
+        print("not exist busket")
