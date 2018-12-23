@@ -14,7 +14,7 @@ s3 = boto3.client(
     region_name=config['region_name']
 )
 
-bucket_config = config['s3']['buckets'][0]
+bucket_config = config['s3']['buckets'][1]
 
 busket_name = bucket_config['name']
 list_objects = s3.list_objects(Bucket=busket_name)
@@ -29,6 +29,9 @@ if ('Contents' in list_objects):
             ],
             'Quiet': True
         })
+
+if bucket_config['type'] == 'static-hosting':
+    s3.delete_bucket_website(Bucket=busket_name)
 
 s3.delete_bucket(Bucket=busket_name)
 
