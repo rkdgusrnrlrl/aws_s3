@@ -7,7 +7,7 @@ from botocore.errorfactory import BaseClientExceptions
 with open('config.json') as f:
     config = json.load(f)
 
-s3 = boto3.resource(
+s3 = boto3.client(
     's3',
     aws_access_key_id=config['aws_access_key_id'],
     aws_secret_access_key=config['aws_secret_access_key'],
@@ -15,9 +15,22 @@ s3 = boto3.resource(
 )
 
 bucket_config = config['s3']['buckets'][0]
-bucket = s3.Bucket(bucket_config['name'])
-try:
-    bucket.delete()
-except Exception as e:
-    if e.response['Error']['Code']:
-        print("not exist busket")
+
+busket_name = bucket_config['name']
+list_objects = s3.list_objects(Bucket=busket_name)
+
+if ('Contents' in list_objects):
+    for obj in list_objects['Contents']:
+        s3.delete_objects(Bucket=bucket_config['name'], Delete={
+            'Objects': [
+                {
+                    'Key': obj['Key']
+                }
+            ],
+            'Quiet': True
+        })
+
+s3.delete_bucket(Bucket=busket_name)
+
+
+
